@@ -84,18 +84,23 @@ int args_find_id(const args_t* list, const char* name, char shortTag)
 	while(list[i].enable >= 0)
 	{
 		// Compare name
-		if(args_strcmp(name, list[i].name) == 0)
+		if(name != NULL)
+		{
+			if(args_strcmp(name, list[i].name) == 0)
+			{
+				ret = i;
+				break;
+			}
+		}
+
+		// Compare tag
+		if(list[i].shortTag > ' ' && shortTag == list[i].shortTag)
 		{
 			ret = i;
 			break;
 		}
 
-		// Compare tag
-		if(list[i].shortTag > ' ' || shortTag == list[i].shortTag)
-		{
-			ret = i;
-			break;
-		}
+		i++;
 	}
 
 	LOG("exit");
