@@ -28,7 +28,7 @@ RET:
 	return ret;
 }
 
-int args_parse(args_t* list, int argc, const char* argv[], const char* versionMsg)
+int args_parse(args_t* list, int argc, char* argv[], const char* versionMsg)
 {
 	int i, j;
 	int ret = ARGS_NO_ERROR;
@@ -36,7 +36,7 @@ int args_parse(args_t* list, int argc, const char* argv[], const char* versionMs
 	int tmpLen;
 	int argCount, argId;
 	const char* name = NULL;
-	const char** leadPtr;
+	char** leadPtr;
 
 	LOG("enter");
 
