@@ -31,12 +31,16 @@ int args_parse(const args_t* list, int argc, const char* argv[], const char* ver
 {
 	int i;
 	int ret = ARGS_NO_ERROR;
+	int type;
+	const char* name;
 
 	LOG("enter");
 
 	// Processing argument
 	for(i = 1; i < argc; i++)
 	{
+		// Find string type
+		type = args_find_type(argv[i], &name);
 	}
 
 	LOG("exit");
@@ -57,7 +61,7 @@ int args_find_type(const char* src, const char** strPtr)
 	// Parse string
 	for(i = 0; i < srcLen; i++)
 	{
-		if(src[i] == '-')
+		if(src[i] == '-' && ret < ARGS_TYPE_NAME)
 		{
 			ret++;
 		}
