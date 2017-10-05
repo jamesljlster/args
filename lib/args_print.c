@@ -4,68 +4,120 @@
 #include "args_private.h"
 #include "debug.h"
 
-#define ARGS_NAME_STR	"Argument"
-#define ARGS_TAG_STR	"Short Tag"
-#define ARGS_LEAD_STR	"Value"
+#define ARGS_NAME_STR	"[Argument]"
+#define ARGS_TAG_STR	"[Tag]"
+#define ARGS_LEAD_STR	"[Value]"
+#define ARGS_HELP_STR	"[Description]"
 
 #define ARGS_BUF_SIZE	128
 
 void args_print_summary(const args_t* list)
 {
+	int flag = ARGS_ENABLE_NAME | ARGS_ENABLE_LEAD;
+	args_print_flag(list, 0, flag);
+}
+
+void args_print_help(const args_t* list)
+{
+	int flag = ~ARGS_ENABLE_LEAD;
+	args_print_flag(list, 1, flag);
+}
+
+void args_print_flag(const args_t* list, int full, int flag)
+{
 	int i, j;
 	int ret;
 	int procIndex;
-	int nameIndent, leadIndent;
-	char buf[ARGS_BUF_SIZE];
+	int nameIndent = 0, tagIndent = 0, leadIndent = 0;
 	char leadBuf[ARGS_BUF_SIZE];
 
-	// Find indents
-	nameIndent = args_find_name_indent(list, 0, ARGS_NAME_STR);
-	leadIndent = args_find_tag_indent(list, 0, ARGS_LEAD_STR);
-
-	// Generate format
-	ret = snprintf(buf, ARGS_BUF_SIZE - 1, " %%-%ds %%-%ds\n", nameIndent, leadIndent);
-	if(ret <= 0 || ret >= ARGS_BUF_SIZE)
+	// Find indents and print header
+	if(flag & ARGS_ENABLE_NAME)
 	{
-		fprintf(stderr, "Insufficient buffer size!\n");
+		nameIndent = args_find_name_indent(list, full, ARGS_NAME_STR);
+		printf("\t%-*s", nameIndent, ARGS_NAME_STR);
 	}
 
+	if(flag & ARGS_ENABLE_TAG)
+	{
+		tagIndent = args_find_tag_indent(list, full, ARGS_TAG_STR);
+		printf("\t%-*s", tagIndent, ARGS_TAG_STR);
+	}
+
+	if(flag & ARGS_ENABLE_LEAD)
+	{
+		leadIndent = args_find_leading_indent(list, full, ARGS_LEAD_STR);
+		printf("\t%-*s", leadIndent, ARGS_LEAD_STR);
+	}
+
+	if(flag & ARGS_ENABLE_HELP)
+	{
+		printf("\t%s", ARGS_HELP_STR);
+	}
+
+	printf("\n");
+
 	// Print summary
-	printf(buf, ARGS_NAME_STR, ARGS_LEAD_STR);
 	for(i = 0; list[i].enable >= 0; i++)
 	{
-		if(list[i].enable > 0)
+		if(list[i].enable > 0 || full > 0)
 		{
-			// Processing leading
-			if(list[i].allowLeading == 0)
+			// Print group
+			if((flag & ARGS_ENABLE_GROUP) && list[i].groupMsg != NULL)
 			{
-				ret = snprintf(leadBuf, ARGS_BUF_SIZE - 1, "ON");
-				if(ret <= 0 || ret >= ARGS_BUF_SIZE - 1)
-				{
-					fprintf(stderr, "Insufficient buffer size!\n");
-				}
+				printf("\n%s\n", list[i].groupMsg);
 			}
-			else
+
+			// Print name
+			if((flag & ARGS_ENABLE_NAME) && list[i].name != NULL)
+			{
+				printf("\t%-*s", nameIndent, list[i].name);
+			}
+
+			// Print tag
+			if((flag & ARGS_ENABLE_TAG) && list[i].shortTag > ' ')
+			{
+				printf("\t%-*c", tagIndent, list[i].shortTag);
+			}
+
+			// Print leading
+			if(flag & ARGS_ENABLE_LEAD)
 			{
 				leadBuf[0] = '\0';
-				for(j = 0; j < list[i].allowLeading; j++)
-				{
-					procIndex = strlen(leadBuf);
-					ret = snprintf(&leadBuf[procIndex], ARGS_BUF_SIZE - procIndex - 1, "%s", list[i].leading[j]);
-					if(ret <= 0 || ret >= ARGS_BUF_SIZE - 1)
-					{
-						fprintf(stderr, "Insufficient buffer size!\n");
-					}
 
-					if(j < list[i].allowLeading - 1)
+				// Processing leading
+				if(list[i].allowLeading > 0)
+				{
+					for(j = 0; j < list[i].allowLeading && list[i].leading != NULL; j++)
 					{
 						procIndex = strlen(leadBuf);
-						strncat(leadBuf, " ", ARGS_BUF_SIZE - procIndex - 1);
+						ret = snprintf(&leadBuf[procIndex], ARGS_BUF_SIZE - procIndex - 1, "%s", list[i].leading[j]);
+						if(ret <= 0 || ret >= ARGS_BUF_SIZE - 1)
+						{
+							fprintf(stderr, "Insufficient buffer size!\n");
+						}
+
+						if(j < list[i].allowLeading - 1)
+						{
+							procIndex = strlen(leadBuf);
+							strncat(leadBuf, " ", ARGS_BUF_SIZE - procIndex - 1);
+						}
 					}
+				}
+
+				printf("\t%-*s", leadIndent, leadBuf);
+			}
+
+			// Print description
+			if(flag & ARGS_ENABLE_HELP)
+			{
+				if(list[i].helpMsg != NULL)
+				{
+					printf("\t%s", list[i].helpMsg);
 				}
 			}
 
-			printf(buf, list[i].name, leadBuf);
+			printf("\n");
 		}
 	}
 }
