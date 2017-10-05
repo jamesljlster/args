@@ -23,5 +23,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
+	args_print_summary(list);
+
 	return 0;
 }
