@@ -15,7 +15,7 @@ typedef struct
 	char shortTag;
 
 	int allowLeading;
-	const char* leading;
+	char** leading;
 
 	const char* groupMsg;
 	const char* helpMsg;
@@ -27,7 +27,7 @@ typedef struct
 extern "C" {
 #endif
 
-int args_parse(const args_t* list, int argc, const char* argv[], const char* versionMsg);
+int args_parse(args_t* list, int argc, char* argv[], const char* versionMsg);
 void args_print_summary(const args_t* list);
 void args_print_help(const args_t* list);
 
