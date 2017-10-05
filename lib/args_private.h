@@ -18,6 +18,10 @@ int args_strcmp(const char* src1, const char* src2);
 int args_find_id(const args_t* list, const char* name, char shortTag);
 int args_find_type(const char* src, const char** strPtr);
 
+int args_find_name_indent(const args_t* list, int full, const char* msg);
+int args_find_tag_indent(const args_t* list, int full, const char* msg);
+int args_find_leading_indent(const args_t* list, int full, const char* msg);
+
 #ifdef __cplusplus
 }
 #endif
